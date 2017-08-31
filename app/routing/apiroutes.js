@@ -1,29 +1,46 @@
-// Search for Specific Character (or all characters) - provides JSON
-app.get("/api/friends", function(req, res) {
-  var chosen = req.params.friends;
+var friendData      = require('../data/friends.js');
+var path            = require('path');
 
-  if (chosen) {
-    console.log(chosen);
+var totalDifference = 0;
 
-    for (var i = 0; i < friends.length; i++) {
-      if (chosen === friends[i].routeName) {
-        return res.json(friends[i]);
-      }
-    }
+module.exports = function(app){
+    app.get('/app/data/friends', function(req, res){
+        res.json(friends);
+    });
 
-    return res.json(false);
-  }
-  return res.json(friends);
-});
+    app.post('/app/data/friends', function(req, res){
 
-// Create New Characters - takes in JSON input
-app.post("/api/friends", function(req, res) {
-  var newfriend = req.body;
-  newfriend.routeName = newfriend.name.replace(/\s+/g, "").toLowerCase();
+        var greatMatch = {
+            name: "",
+            image: "",
+            matchDifference: 1000
+        };
+        var usrData     = req.body;
+        var usrName     = usrData.name;
+        var usrImage    = usrData.image;
+        var usrScores   = usrData.scores;
 
-  console.log(newfriend);
+        var totalDifference = 0;
 
-  friends.push(newfriend);
+        for(var i = 0; i < [friends].length-1; i++){
+            console.log(friends[i].name);
+            totalDifference = 0;
 
-  res.json(newfriend);
-});
+            for(var j = 0; j < 10; j++){
+                
+                totalDifference += Math.abs(parseInt(usrScores[j]) - parseInt(friends[i].scores[j]));
+                
+                if (totalDifference <= greatMatch.friendDifference){
+
+                    greatMatch.name = friends[i].name;
+                    greatMatch.photo = friends[i].photo;
+                    greatMatch.matchDifference = totalDifference;
+                }
+            }
+        }
+
+        friends.push(usrData);
+ 
+        res.json(greatMatch);
+    });
+};
